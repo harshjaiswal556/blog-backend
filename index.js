@@ -17,6 +17,7 @@ const secret = "HarshJaiswal0987@1234$"
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 mongoose.connect("mongodb+srv://harshjais3110:hs%203110@cluster0.tq9cf.mongodb.net/blogging?retryWrites=true&w=majority")
 
@@ -83,19 +84,31 @@ app.post("/post", uploadMiddleware.single('file'), async (req, res) => {
     const newPath = path + '.' + ext;
     fs.renameSync(path, newPath);
 
-    const { title, summary, content } = req.body;
-    try {
-        const postDoc = await Post.create({
-            title,
-            summary,
-            content,
-            cover: newPath,
-        })
+    const { token } = req.cookies;
+    jwt.verify(token, secret, {}, async (err, info) => {
+        if (err) throw err;
+        const { title, summary, content } = req.body;
+        try {
+            const postDoc = await Post.create({
+                title,
+                summary,
+                content,
+                cover: newPath,
+                author: info.id
+            })
 
-        res.json({ postDoc })
-    } catch (err) {
-        res.status(400).send(err);
-    }
+            res.json({ postDoc })
+        } catch (err) {
+            res.status(400).send(err);
+        }
+    })
+
+
 
 })
+
+app.get("/post", async (req, res) => {
+    res.json(await Post.find().populate('author', ['username']).sort({ 'createdAt': -1 }));
+})
+
 app.listen(4000);
