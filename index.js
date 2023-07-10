@@ -109,6 +109,7 @@ app.post("/post", uploadMiddleware.single('file'), async (req, res) => {
 
 app.put('/post', uploadMiddleware.single('file'), async (req, res) => {
     let newPath = null;
+    console.log("updated")
     if (req.file) {
         const { originalname, path } = req.file;
         const parts = originalname.split('.');
@@ -134,6 +135,7 @@ app.put('/post', uploadMiddleware.single('file'), async (req, res) => {
                 cover: newPath ? newPath : postDoc.cover,
             });
             res.json(postDoc);
+            console.log("updated")
         })
     }
 
