@@ -11,6 +11,9 @@ const uploadMiddleware = multer({ dest: 'uploads/' })
 const fs = require('fs');
 const Post = require('./models/Post');
 const dotenv = require('dotenv');
+// const hbs = require('handlebars')
+const nodemailer = require('nodemailer')
+const path = require('path')
 
 const salt = bcrypt.genSaltSync(10);
 const secret = "HarshJaiswal0987@1234$"
@@ -25,9 +28,10 @@ dotenv.config();
 mongoose.connect(process.env.MONGODB_URL)
 
 app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, email } = req.body;
     try {
         const userDoc = await User.create({
+            email,
             username,
             password: bcrypt.hashSync(password, salt)
         })
@@ -155,4 +159,6 @@ app.get("/post/:id", async (req, res) => {
     const postDoc = await Post.findById(id).populate('author', ['username']);
     res.json(postDoc);
 })
-app.listen(4000);
+app.listen(4000, () => {
+    console.log('listening on http://localhost:4000');
+});
